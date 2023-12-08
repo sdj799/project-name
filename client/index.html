@@ -1,0 +1,24 @@
+<html>
+  <head>
+    <script>
+      const socket = new WebSocket('ws://localhost:8080');
+      socket.onopen = function() {
+        console.log('Connected');
+        socket.send(
+          JSON.stringify({
+            event: '/login/qr',
+            data: {"memberId" : "homechoice8",
+"memberPw" : "8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92",
+"code" : "4138 "
+}
+          }),
+        );
+        socket.onmessage = function(data) {
+          console.log(data);
+        };
+      };
+    </script>
+  </head>
+
+  <body></body>
+</html>
