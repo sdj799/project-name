@@ -7,6 +7,7 @@ import {
   } from '@nestjs/websockets';
 import { Server, WebSocket } from 'ws';
 import { AuthService } from './auth.service';
+import { QrRequestDto, QrResponseDto } from './dto/qr-login.dto';
   
   @WebSocketGateway(8080)
   export class AuthGateway 
@@ -24,18 +25,20 @@ import { AuthService } from './auth.service';
       console.log('connected');
     }
 
-    @SubscribeMessage('events')
-    onEvent(client: WebSocket, data: any): void {
-      console.log(data);
-      if (data.memberPw) {
-        let code = data.memberPw;   
+    // 스마트 TV 인증코드전달
+    @SubscribeMessage('addNewDevice')
+    onEvent(client: WebSocket, data: QrRequestDto): void {
+      // console.log(data);
+      if (data.code) {
+        let code = data.code;
         this.smartTVClients.set(code, client);
       }
-      console.log(this.smartTVClients);
+      // console.log(this.smartTVClients);
     }
 
+    // 모바일 앱 로그인 정보 전달
     @SubscribeMessage('/login/qr')
-    onQRScan(client: WebSocket, data: any): any {
+    onQRScan(client: WebSocket, data: QrResponseDto): any {
       console.log(data);
       let selectClient: WebSocket;
       
@@ -45,9 +48,13 @@ import { AuthService } from './auth.service';
           break;
         }
       }
-      console.log(selectClient);
+      // console.log(selectClient);
+
+      if(!selectClient) {
+        return '다시 요청해주세요';
+      }
       
-      // 선택된 클라이언트로 websocket 보내기
+      // 선택된 클라이언트로 data 보내기
       try {
         selectClient.send(JSON.stringify(data));
       } catch (error) {
@@ -58,7 +65,7 @@ import { AuthService } from './auth.service';
 
     // 웹소켓 연결 해제시
     public handleDisconnect(client: WebSocket) {
-      console.log('disconnetced', client);
+      // console.log('disconnetced', client);
       // 웹소켓으로 code찾아서 리스트에서 삭제
       for (const [key, value] of this.smartTVClients.entries()) {
         if (value === client) {
@@ -66,6 +73,6 @@ import { AuthService } from './auth.service';
           break;
         }
       }
-      console.log(this.smartTVClients);
+      // console.log(this.smartTVClients);
     }
   }
