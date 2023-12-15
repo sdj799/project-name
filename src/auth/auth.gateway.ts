@@ -9,7 +9,7 @@ import { Server, WebSocket } from 'ws';
 import { AuthService } from './auth.service';
 import { QrRequestDto, QrResponseDto } from './dto/qr-login.dto';
   
-  @WebSocketGateway(8080)
+  @WebSocketGateway({path: '/ws'})
   export class AuthGateway 
     implements OnGatewayConnection, OnGatewayDisconnect
   {
@@ -27,9 +27,13 @@ import { QrRequestDto, QrResponseDto } from './dto/qr-login.dto';
 
     // 스마트 TV 인증코드전달
     @SubscribeMessage('addNewDevice')
-    onEvent(client: WebSocket, data: QrRequestDto): void {
+    onEvent(client: WebSocket, data: QrRequestDto): any {
       // console.log(data);
+      // 코드가 같을 경우
       if (data.code) {
+        if(this.smartTVClients.has(data.code)) {
+          return { errorString : "이미 있는 코드입니다. 다시 요청해주세요"};
+        }
         let code = data.code;
         this.smartTVClients.set(code, client);
       }

@@ -5,7 +5,7 @@ import { AppModule } from './app.module';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   app.useWebSocketAdapter(new WsAdapter(app));
-  await app.listen(3001);
+  await app.listen(5926);
   console.log(`Application is running on: ${await app.getUrl()}`);
 
 }
